@@ -36,7 +36,7 @@ public class GlobalExceptionHandler {
 				HttpStatus.NOT_FOUND.value(), 
 				mensagem,
 				LocalDateTime.now());
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(erro);
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(erro);
 	}
 	
 	@ExceptionHandler(EntityNotFoundException.class)
