@@ -9,7 +9,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -23,16 +22,14 @@ public class Partida implements PersistEntity{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id_partida")
 	private Long id;
 	
 	@Column(name = "nome_partida")
 	private String nomePartida;
 	
-	@Column(name = "data_inicio")
-	private LocalDateTime dataInicio;
-	
-	@Column(name = "data_fim")
-	private LocalDateTime dataFim;
+	@Column(name = "data_partida")
+	private LocalDateTime data_partida;
 	
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status_partida")
@@ -62,20 +59,12 @@ public class Partida implements PersistEntity{
 		this.nomePartida = nomePartida;
 	}
 
-	public LocalDateTime getDataInicio() {
-		return dataInicio;
+	public LocalDateTime getData_partida() {
+		return data_partida;
 	}
 
-	public void setDataInicio(LocalDateTime dataInicio) {
-		this.dataInicio = dataInicio;
-	}
-
-	public LocalDateTime getDataFim() {
-		return dataFim;
-	}
-
-	public void setDataFim(LocalDateTime dataFim) {
-		this.dataFim = dataFim;
+	public void setData_partida(LocalDateTime data_partida) {
+		this.data_partida = data_partida;
 	}
 
 	public StatusPartida getStatusPartida() {

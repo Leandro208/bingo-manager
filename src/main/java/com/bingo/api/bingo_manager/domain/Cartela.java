@@ -10,49 +10,53 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
 @Table
-public class Usuario implements PersistEntity {
+public class Cartela implements PersistEntity{
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id_usuario")
-	private Long id;
-	
-	private String nome;
-	
-	private String email;
-	
-	@CreationTimestamp
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id_cartela")
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_partida")
+    private Partida partida;
+
+    @ManyToOne
+    @JoinColumn(name = "id_usuario")
+    private Usuario usuario;
+
+    @CreationTimestamp
 	@Column(name = "data_cadastro", nullable = false, updatable = false)
 	private LocalDateTime dataCadastro;
-	
-	private String senha;
-	
+
 	public Long getId() {
 		return id;
 	}
-	
+
 	public void setId(Long id) {
 		this.id = id;
 	}
 
-	public String getNome() {
-		return nome;
+	public Partida getPartida() {
+		return partida;
 	}
 
-	public void setNome(String nome) {
-		this.nome = nome;
+	public void setPartida(Partida partida) {
+		this.partida = partida;
 	}
 
-	public String getEmail() {
-		return email;
+	public Usuario getUsuario() {
+		return usuario;
 	}
 
-	public void setEmail(String email) {
-		this.email = email;
+	public void setUsuario(Usuario usuario) {
+		this.usuario = usuario;
 	}
 
 	public LocalDateTime getDataCadastro() {
@@ -61,16 +65,6 @@ public class Usuario implements PersistEntity {
 
 	public void setDataCadastro(LocalDateTime dataCadastro) {
 		this.dataCadastro = dataCadastro;
-	}
-	
-	
-
-	public String getSenha() {
-		return senha;
-	}
-
-	public void setSenha(String senha) {
-		this.senha = senha;
 	}
 
 	@Override
@@ -86,10 +80,7 @@ public class Usuario implements PersistEntity {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Usuario other = (Usuario) obj;
+		Cartela other = (Cartela) obj;
 		return Objects.equals(id, other.id);
 	}
-	
-	
-
 }

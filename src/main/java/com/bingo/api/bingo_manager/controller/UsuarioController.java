@@ -1,6 +1,5 @@
 package com.bingo.api.bingo_manager.controller;
 
-import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
