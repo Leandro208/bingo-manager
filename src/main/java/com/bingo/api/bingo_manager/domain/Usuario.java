@@ -23,6 +23,7 @@ public class Usuario implements PersistEntity {
 	
 	private String nome;
 	
+	@Column(unique = true)
 	private String email;
 	
 	@CreationTimestamp

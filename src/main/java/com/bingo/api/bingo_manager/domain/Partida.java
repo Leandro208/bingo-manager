@@ -1,6 +1,7 @@
 package com.bingo.api.bingo_manager.domain;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -14,6 +15,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -29,7 +31,7 @@ public class Partida implements PersistEntity{
 	private String nomePartida;
 	
 	@Column(name = "data_partida")
-	private LocalDateTime data_partida;
+	private LocalDateTime dataPartida;
 	
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status_partida")
@@ -42,6 +44,15 @@ public class Partida implements PersistEntity{
 	@ManyToOne
 	@JoinColumn(name = "id_usuario_criador")
 	private Usuario criador;
+	
+    @OneToMany(mappedBy = "partida")
+    private List<Cartela> cartelas;
+
+    @OneToMany(mappedBy = "partida")
+    private List<NumeroSorteado> numerosSorteados;
+
+    @OneToMany(mappedBy = "partida")
+    private List<Vencedor> vencedores;
 
 	public Long getId() {
 		return id;
@@ -59,12 +70,12 @@ public class Partida implements PersistEntity{
 		this.nomePartida = nomePartida;
 	}
 
-	public LocalDateTime getData_partida() {
-		return data_partida;
+	public LocalDateTime getDataPartida() {
+		return dataPartida;
 	}
 
-	public void setData_partida(LocalDateTime data_partida) {
-		this.data_partida = data_partida;
+	public void setDataPartida(LocalDateTime dataPartida) {
+		this.dataPartida = dataPartida;
 	}
 
 	public StatusPartida getStatusPartida() {
@@ -89,6 +100,30 @@ public class Partida implements PersistEntity{
 
 	public void setCriador(Usuario criador) {
 		this.criador = criador;
+	}
+
+	public List<Cartela> getCartelas() {
+		return cartelas;
+	}
+
+	public void setCartelas(List<Cartela> cartelas) {
+		this.cartelas = cartelas;
+	}
+
+	public List<NumeroSorteado> getNumerosSorteados() {
+		return numerosSorteados;
+	}
+
+	public void setNumerosSorteados(List<NumeroSorteado> numerosSorteados) {
+		this.numerosSorteados = numerosSorteados;
+	}
+
+	public List<Vencedor> getVencedores() {
+		return vencedores;
+	}
+
+	public void setVencedores(List<Vencedor> vencedores) {
+		this.vencedores = vencedores;
 	}
 
 	@Override

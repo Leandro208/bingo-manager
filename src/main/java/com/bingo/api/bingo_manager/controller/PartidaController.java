@@ -1,19 +1,24 @@
 package com.bingo.api.bingo_manager.controller;
 
+import java.net.URI;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import com.bingo.api.bingo_manager.domain.Partida;
+import com.bingo.api.bingo_manager.dto.PartidaDTO;
+import com.bingo.api.bingo_manager.dto.PartidaDetalhesDTO;
+import com.bingo.api.bingo_manager.dto.input.PartidaInput;
 import com.bingo.api.bingo_manager.service.PartidaService;
 
 @RestController
-@RequestMapping("/partida")
+@RequestMapping("/partidas")
 public class PartidaController {
 
 	private final PartidaService partidaService;
@@ -23,14 +28,20 @@ public class PartidaController {
 	}
 	
 	@PostMapping
-	public ResponseEntity<Partida> create(@RequestBody Partida partida){
-		return ResponseEntity.ok(partidaService.create(partida));
+	public ResponseEntity<PartidaDTO> create(@RequestBody PartidaInput partida, UriComponentsBuilder uriBuilder) {
+		PartidaDTO partidaCriada = partidaService.create(partida);
+		URI uri = uriBuilder.path("/topicos/{id}").buildAndExpand(partidaCriada.getId()).toUri();
+
+		return ResponseEntity.created(uri).body(partidaCriada);
 	}
 	
 	@GetMapping
-	public List<Partida> findAll(){
+	public List<PartidaDetalhesDTO> findAll(){
 		return partidaService.findAll();
 	}
 	
-	
+	@PostMapping("/{partidaId}/entrar")
+	public ResponseEntity<PartidaDetalhesDTO> entrar(@PathVariable Long partidaId) {
+		return ResponseEntity.ok(partidaService.entrar(partidaId));
+	}
 }
