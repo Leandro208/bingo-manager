@@ -11,10 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.bingo.api.bingo_manager.domain.Cartela;
 import com.bingo.api.bingo_manager.domain.CartelaNumero;
 import com.bingo.api.bingo_manager.domain.Partida;
+import com.bingo.api.bingo_manager.domain.StatusPartida;
 import com.bingo.api.bingo_manager.domain.Usuario;
 import com.bingo.api.bingo_manager.dto.PartidaDTO;
 import com.bingo.api.bingo_manager.dto.PartidaDetalhesDTO;
 import com.bingo.api.bingo_manager.dto.input.PartidaInput;
+import com.bingo.api.bingo_manager.exception.PartidaNaoAguardandoException;
 import com.bingo.api.bingo_manager.repository.CartelaNumeroRepository;
 import com.bingo.api.bingo_manager.repository.CartelaRepository;
 import com.bingo.api.bingo_manager.repository.PartidaRepository;
@@ -64,21 +66,36 @@ public class PartidaService {
 		}).toList();
 	}
 
+	public PartidaDTO iniciar(Long idPartida) {
+		Partida partida = partidaRepository.findById(idPartida).orElseThrow(() -> new  EntityNotFoundException("Nenhuma partida encontrada"));
+		if(!partida.isAguardando()) {
+			throw new PartidaNaoAguardandoException();
+		}
+		partida.setStatusPartida(StatusPartida.EM_ANDAMENTO);
+		return modelMapper.map(partidaRepository.save(partida), PartidaDTO.class);
+	}
+	
 	@Transactional
 	public PartidaDetalhesDTO entrar(Long partidaId) {
 		if (!partidaRepository.existsById(partidaId)) {
 			throw new EntityNotFoundException("Partida não encontrada");
 		}
-
-		// cria cartela
+		Cartela cartela = criaCartela(partidaId);
+		criaNumerosCartela(cartela);
+		return findPartidaDetalhesById(partidaId);
+	}
+	
+	private Cartela criaCartela(Long partidaId) {
 		Cartela cartela = new Cartela();
 		Partida partida = partidaRepository.findById(partidaId).get();
 		cartela.setPartida(partida);
 		cartela.setUsuario(new Usuario());
 		cartela.getUsuario().setId(CRIADOR_FAKE);
 		cartelaRepository.save(cartela);
-
-		// cria numero
+		return cartela;
+	}
+	
+	private void criaNumerosCartela(Cartela cartela){
 		List<CartelaNumero> listaNumeros = new ArrayList<>();
 		List<Integer> numeros = new ArrayList<>();
 		for (int i = 1; i <= 100; i++) {
@@ -94,7 +111,10 @@ public class PartidaService {
 			listaNumeros.add(cartelaNumero);
 		}
 		cartelaNumeroRepository.saveAll(listaNumeros);
-		partida = partidaRepository.findById(partidaId).get();
+	}
+	
+	public PartidaDetalhesDTO findPartidaDetalhesById(Long idPartida) {
+		Partida partida = partidaRepository.findById(idPartida).get();
 		partida.getCartelas().iterator();
 		partida.getNumerosSorteados().iterator();
 		partida.getVencedores().iterator();

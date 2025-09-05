@@ -44,4 +44,9 @@ public class PartidaController {
 	public ResponseEntity<PartidaDetalhesDTO> entrar(@PathVariable Long partidaId) {
 		return ResponseEntity.ok(partidaService.entrar(partidaId));
 	}
+	
+	@PostMapping("/{partidaId}/iniciar")
+	public ResponseEntity<PartidaDTO> iniciar(@PathVariable Long partidaId) {
+		return ResponseEntity.ok(partidaService.iniciar(partidaId));
+	}
 }

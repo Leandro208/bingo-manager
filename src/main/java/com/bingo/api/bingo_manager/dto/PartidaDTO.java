@@ -12,7 +12,7 @@ public class PartidaDTO {
 	private LocalDateTime dataPartida;
 	private LocalDateTime dataCadastro;
 	private StatusPartida statusPartida;
-	private Usuario criador;
+	private JogadorSimplesDTO criador;
 	
 	public Long getId() {
 		return id;
@@ -44,12 +44,13 @@ public class PartidaDTO {
 	public void setStatusPartida(StatusPartida statusPartida) {
 		this.statusPartida = statusPartida;
 	}
-	public Usuario getCriador() {
+	public JogadorSimplesDTO getCriador() {
 		return criador;
 	}
-	public void setCriador(Usuario criador) {
+	public void setCriador(JogadorSimplesDTO criador) {
 		this.criador = criador;
 	}
+	
 
 	
 }
