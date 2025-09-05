@@ -54,6 +54,10 @@ public class Partida implements PersistEntity{
     @OneToMany(mappedBy = "partida")
     private List<Vencedor> vencedores;
 
+    public boolean isAguardando() {
+    	return statusPartida == StatusPartida.AGUARDANDO;
+    }
+    
 	public Long getId() {
 		return id;
 	}
