@@ -50,12 +50,6 @@ public class PartidaService {
 		return modelMapper.map(partida, PartidaDTO.class);
 	}
 
-	public Partida findById(Long partidaId) {
-		return partidaRepository.findById(partidaId)
-				.orElseThrow(() -> new EntityNotFoundException("Nenhuma partida encontrada"));
-
-	}
-
 	@Transactional(readOnly = true)
 	public List<PartidaDetalhesDTO> findAll() {
 		return partidaRepository.findAll().stream().map(partida -> {
@@ -91,8 +85,7 @@ public class PartidaService {
 		cartela.setPartida(partida);
 		cartela.setUsuario(new Usuario());
 		cartela.getUsuario().setId(CRIADOR_FAKE);
-		cartelaRepository.save(cartela);
-		return cartela;
+		return cartelaRepository.save(cartela);
 	}
 	
 	private void criaNumerosCartela(Cartela cartela){
@@ -113,8 +106,10 @@ public class PartidaService {
 		cartelaNumeroRepository.saveAll(listaNumeros);
 	}
 	
+	@Transactional(readOnly = true)
 	public PartidaDetalhesDTO findPartidaDetalhesById(Long idPartida) {
-		Partida partida = partidaRepository.findById(idPartida).get();
+		Partida partida = partidaRepository.findById(idPartida)
+		        .orElseThrow(() -> new EntityNotFoundException("Partida não encontrada"));
 		partida.getCartelas().iterator();
 		partida.getNumerosSorteados().iterator();
 		partida.getVencedores().iterator();
