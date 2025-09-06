@@ -14,6 +14,7 @@ import com.bingo.api.bingo_manager.dto.CartelaNumeroDTO;
 public interface CartelaNumeroRepository extends JpaRepository<CartelaNumero, Long> {
 
 	@Query("SELECT new com.bingo.api.bingo_manager.dto.CartelaNumeroDTO(cn.numero, cn.marcado) "
-			+ "FROM CartelaNumero cn WHERE cn.cartela.id = :cartelaId")
+			+ "FROM CartelaNumero cn WHERE cn.cartela.id = :cartelaId "
+			+ "ORDER BY cn.numero")
 	List<CartelaNumeroDTO> findAllByCartelaId(@Param("cartelaId") Long cartelaId);
 }

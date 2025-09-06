@@ -49,4 +49,9 @@ public class PartidaController {
 	public ResponseEntity<PartidaDTO> iniciar(@PathVariable Long partidaId) {
 		return ResponseEntity.ok(partidaService.iniciar(partidaId));
 	}
+	
+	@GetMapping("/{partidaId}")
+	public ResponseEntity<PartidaDetalhesDTO> buscarPorId(@PathVariable Long partidaId){
+		return ResponseEntity.ok(partidaService.findPartidaDetalhesById(partidaId));
+	}
 }
