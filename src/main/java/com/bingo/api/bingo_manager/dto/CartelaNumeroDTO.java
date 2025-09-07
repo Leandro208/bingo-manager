@@ -4,7 +4,10 @@ public class CartelaNumeroDTO {
 
 	private int numero;
 	private boolean marcado;
-	
+
+	public CartelaNumeroDTO() {
+	}
+
 	public CartelaNumeroDTO(int numero, boolean marcado) {
 		this.numero = numero;
 		this.marcado = marcado;

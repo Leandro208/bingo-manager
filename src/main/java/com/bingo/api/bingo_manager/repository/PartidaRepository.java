@@ -12,7 +12,21 @@ import java.util.List;
 
 @Repository
 public interface PartidaRepository extends JpaRepository<Partida, Long>{
-    List<Partida> findAllByStatusPartida(StatusPartida statusPartida);
+    @Query("SELECT DISTINCT p FROM Partida p " +
+            "LEFT JOIN FETCH p.cartelas c " +
+            "LEFT JOIN FETCH c.usuario u")
+    List<Partida> findAllWithCartelas();
+
+    @Query("SELECT DISTINCT p FROM Partida p " +
+            "LEFT JOIN FETCH p.cartelas c " +
+            "LEFT JOIN FETCH c.usuario u " +
+            "WHERE p.statusPartida = :status")
+    List<Partida> findAllByStatusPartida(StatusPartida status);
+
+    @Query("SELECT DISTINCT p FROM Partida p " +
+            "LEFT JOIN FETCH p.numerosSorteados ns " +
+            "WHERE p IN :partidas")
+    List<Partida> findAllWithNumerosSorteados(@Param("partidas") List<Partida> partidas);
 
     @Query("select p.statusPartida from Partida p " +
             "where p.id = :id")
