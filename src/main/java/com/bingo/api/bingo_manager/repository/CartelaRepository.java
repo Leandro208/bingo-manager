@@ -23,4 +23,15 @@ public interface CartelaRepository extends JpaRepository<Cartela, Long>{
 			"WHERE p.id = :partidaId AND u.id = :userId")
 	Optional<Cartela> findByPartidaIdAndUserIdWithDetails(@Param("partidaId") Long partidaId, @Param("userId") Long userId
 	);
+
+    @Query("SELECT COUNT(*) > 0 FROM Cartela c " +
+            "where c.partida.id = :partidaId " +
+            "and c.hashCodeNumeros = :hashCode")
+    Boolean containsByHashCodeAndPartidaId(@Param("hashCode") int hashCode, @Param("partidaId") Long partidaId);
+
+
+    @Query("SELECT COUNT(*) > 3 FROM Cartela c " +
+            "WHERE c.partida.id = :partidaId " +
+            "and c.usuario.id = :usuarioId")
+    Boolean isLimiteAtingidoDeCartelasPorUsuario(@Param("partidaId")  Long partidaId, @Param("usuarioId") Long usuarioId);
 }

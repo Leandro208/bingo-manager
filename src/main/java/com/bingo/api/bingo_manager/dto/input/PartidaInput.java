@@ -8,7 +8,6 @@ public class PartidaInput {
 	
 	private String nomePartida;
 	private LocalDateTime dataPartida;
-	private StatusPartida statusPartida = StatusPartida.AGUARDANDO;
 	
 	public String getNomePartida() {
 		return nomePartida;
@@ -17,16 +16,10 @@ public class PartidaInput {
 		this.nomePartida = nomePartida;
 	}
 	public LocalDateTime getDataPartida() {
-		return dataPartida;
+		return dataPartida != null ? dataPartida : LocalDateTime.now();
 	}
 	public void setDataPartida(LocalDateTime dataPartida) {
 		this.dataPartida = dataPartida;
-	}
-	public StatusPartida getStatusPartida() {
-		return statusPartida;
-	}
-	public void setStatusPartida(StatusPartida statusPartida) {
-		this.statusPartida = statusPartida;
 	}
 	
 	

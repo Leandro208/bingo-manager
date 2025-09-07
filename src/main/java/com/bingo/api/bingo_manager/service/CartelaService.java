@@ -1,5 +1,7 @@
 package com.bingo.api.bingo_manager.service;
 
+import com.bingo.api.bingo_manager.domain.CartelaNumero;
+import com.bingo.api.bingo_manager.exception.CartelaNaoCriadaException;
 import com.bingo.api.bingo_manager.repository.UsuarioRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -18,6 +20,10 @@ import com.bingo.api.bingo_manager.repository.PartidaRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 @Service
 public class CartelaService {
 
@@ -25,9 +31,9 @@ public class CartelaService {
 	private final PartidaRepository partidaRepository;
 	private final UsuarioRepository usuarioRepository;
 	private final CartelaNumeroRepository cartelaNumeroRepository;
-
 	private final ModelMapper modelMapper;
-	
+    private final int QTD_NUMEROS_CARTELA = 24;
+
 	public CartelaService(CartelaRepository cartelaRepository, PartidaRepository partidaRepository, UsuarioRepository usuarioRepository, ModelMapper modelMapper, CartelaNumeroRepository cartelaNumeroRepository) {
 		this.cartelaRepository = cartelaRepository;
 		this.partidaRepository = partidaRepository;
@@ -47,4 +53,47 @@ public class CartelaService {
 		return modelMapper.map(cartela, CartelaDTO.class);
 	}
 
+
+    public void criaCartela(Long partidaId, JwtAuthenticationToken token) {
+        Cartela cartela = new Cartela();
+        Partida partida = partidaRepository.findById(partidaId).get();
+        if(cartelaRepository.isLimiteAtingidoDeCartelasPorUsuario(partidaId, Long.parseLong(token.getName()))) {
+            throw new CartelaNaoCriadaException("O limite de Cartelas por usuário foi atingido! Apague uma das Cartelas");
+        }
+        cartela.setPartida(partida);
+        cartela.setUsuario(usuarioRepository.findById((Long.parseLong(token.getName()))).get());
+        cartela.getUsuario().setId(Long.parseLong(token.getName()));
+        cartelaRepository.save(cartela);
+        criaNumerosCartela(cartela);
+    }
+
+    public void criaNumerosCartela(Cartela cartela){
+        List<CartelaNumero> listaNumeros = new ArrayList<>();
+        List<Integer> numerosGerados = sorteiaNumerosCartela();
+        Collections.sort(numerosGerados);
+        int hashCode = numerosGerados.hashCode();
+        while(cartelaRepository.containsByHashCodeAndPartidaId(hashCode, cartela.getPartida().getId())){
+            numerosGerados = sorteiaNumerosCartela();
+        }
+        System.out.println("Numeros Gerados : " + numerosGerados);
+        for (int i = 0; i < QTD_NUMEROS_CARTELA; i++) {
+            CartelaNumero cartelaNumero = new CartelaNumero();
+            cartelaNumero.setCartela(cartela);
+            cartelaNumero.setMarcado(false);
+            cartelaNumero.setNumero(numerosGerados.get(i));
+            listaNumeros.add(cartelaNumero);
+        }
+        cartela.setHashCodeNumeros(hashCode);
+        cartelaRepository.save(cartela);
+        cartelaNumeroRepository.saveAll(listaNumeros);
+    }
+
+    private List<Integer> sorteiaNumerosCartela(){
+        List<Integer> numeros = new ArrayList<>();
+        for (int i = 1; i <= 75; i++) {
+            numeros.add(i);
+        }
+        Collections.shuffle(numeros);
+        return numeros.subList(0, QTD_NUMEROS_CARTELA);
+    }
 }
