@@ -36,8 +36,8 @@ public class PartidaController {
 	}
 	
 	@GetMapping
-	public List<PartidaDetalhesDTO> findAll(){
-		return partidaService.findAll();
+	public List<PartidaDetalhesDTO> findAllDisponiveis() {
+		return partidaService.findAllPartidasDisponiveis();
 	}
 	
 	@PostMapping("/{partidaId}/entrar")
@@ -54,4 +54,10 @@ public class PartidaController {
 	public ResponseEntity<PartidaDetalhesDTO> buscarPorId(@PathVariable Long partidaId){
 		return ResponseEntity.ok(partidaService.findPartidaDetalhesById(partidaId));
 	}
+
+    @PostMapping("/{partidaId}/encerrar")
+    public ResponseEntity<PartidaDTO> encerrarPartida(@PathVariable Long partidaId) {
+        return ResponseEntity.ok(partidaService.encerrarPartida(partidaId));
+    }
+
 }
