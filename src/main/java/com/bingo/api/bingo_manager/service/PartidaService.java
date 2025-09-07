@@ -67,14 +67,16 @@ public class PartidaService {
 				.map(partida -> modelMapper.map(partida, PartidaDetalhesDTO.class))
 				.toList();
 	}
-	public List<PartidaDetalhesDTO> findAllPartidasDisponiveis() {
-		return partidaRepository.findAllByStatusPartida(StatusPartida.AGUARDANDO).stream().map(partida -> {
-			partida.getCartelas().iterator();
-			partida.getNumerosSorteados().iterator();
-			partida.getVencedores().iterator();
-			return modelMapper.map(partida, PartidaDetalhesDTO.class);
-		}).toList();
 
+	@Transactional(readOnly = true)
+	public List<PartidaDetalhesDTO> findAllPartidasDisponiveis() {
+		List<Partida> partidas = partidaRepository.findAllByStatusPartida(StatusPartida.AGUARDANDO);
+		if (!partidas.isEmpty()) {
+			partidaRepository.findAllWithNumerosSorteados(partidas);
+		}
+		return partidas.stream()
+				.map(partida -> modelMapper.map(partida, PartidaDetalhesDTO.class))
+				.toList();
 	}
 
 	public PartidaDTO iniciar(Long idPartida) {
