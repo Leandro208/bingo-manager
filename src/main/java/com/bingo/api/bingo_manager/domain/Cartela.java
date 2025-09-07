@@ -1,18 +1,11 @@
 package com.bingo.api.bingo_manager.domain;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
+import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 
 @Entity
 @Table
@@ -34,6 +27,9 @@ public class Cartela implements PersistEntity{
     @CreationTimestamp
 	@Column(name = "data_cadastro", nullable = false, updatable = false)
 	private LocalDateTime dataCadastro;
+
+	@OneToMany(mappedBy = "cartela")
+	private List<CartelaNumero> numeros;
 
 	public Long getId() {
 		return id;
@@ -65,6 +61,14 @@ public class Cartela implements PersistEntity{
 
 	public void setDataCadastro(LocalDateTime dataCadastro) {
 		this.dataCadastro = dataCadastro;
+	}
+
+	public List<CartelaNumero> getNumeros() {
+		return numeros;
+	}
+
+	public void setNumeros(List<CartelaNumero> numeros) {
+		this.numeros = numeros;
 	}
 
 	@Override

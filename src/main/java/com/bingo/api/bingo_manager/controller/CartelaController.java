@@ -1,6 +1,7 @@
 package com.bingo.api.bingo_manager.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +21,7 @@ public class CartelaController {
 	}
 
 	@GetMapping("/{idPartida}/minha-cartela")
-	public ResponseEntity<CartelaDTO> verCartela(@PathVariable Long idPartida){
-		return ResponseEntity.ok(cartelaService.buscarCartelaUsuario(idPartida));
+	public ResponseEntity<CartelaDTO> verCartela(@PathVariable Long idPartida, JwtAuthenticationToken token){
+		return ResponseEntity.ok(cartelaService.buscarCartelaUsuario(idPartida, token));
 	}
 }

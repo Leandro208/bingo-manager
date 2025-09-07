@@ -24,11 +24,6 @@ public class UsuarioController {
 		this.usuarioService = usuarioService;
 	}
 	
-	@PostMapping
-	public ResponseEntity<UsuarioDTO> create(@RequestBody UsuarioInput usuario){
-		return ResponseEntity.status(HttpStatus.CREATED).body(usuarioService.create(usuario));
-	}
-	
 	@GetMapping("/{id}")
 	public ResponseEntity<UsuarioDTO> findbyId(@PathVariable Long id){
 		return ResponseEntity.ok(usuarioService.findById(id));
