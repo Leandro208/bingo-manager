@@ -3,7 +3,10 @@ package com.bingo.api.bingo_manager.service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
+import com.bingo.api.bingo_manager.exception.PartidaEncerradaException;
+import com.bingo.api.bingo_manager.exception.PartidaNaoIniciadaException;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,8 +54,8 @@ public class PartidaService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<PartidaDetalhesDTO> findAll() {
-		return partidaRepository.findAll().stream().map(partida -> {
+	public List<PartidaDetalhesDTO> findAllPartidasDisponiveis() {
+		return partidaRepository.findAllByStatusPartida(StatusPartida.AGUARDANDO).stream().map(partida -> {
 			partida.getCartelas().iterator();
 			partida.getNumerosSorteados().iterator();
 			partida.getVencedores().iterator();
@@ -68,12 +71,30 @@ public class PartidaService {
 		partida.setStatusPartida(StatusPartida.EM_ANDAMENTO);
 		return modelMapper.map(partidaRepository.save(partida), PartidaDTO.class);
 	}
+
+    public PartidaDTO encerrarPartida(Long idPartida) {
+        Partida partida = partidaRepository.findById(idPartida).orElseThrow(() -> new  EntityNotFoundException("Nenhuma partida encontrada"));
+        if (!partida.getStatusPartida().equals(StatusPartida.EM_ANDAMENTO)) {
+            throw new PartidaNaoIniciadaException();
+        }
+        partida.setStatusPartida(StatusPartida.FINALIZADA);
+        return modelMapper.map(partidaRepository.save(partida), PartidaDTO.class);
+    }
 	
 	@Transactional
 	public PartidaDetalhesDTO entrar(Long partidaId) {
 		if (!partidaRepository.existsById(partidaId)) {
 			throw new EntityNotFoundException("Partida não encontrada");
 		}
+        StatusPartida statusPartida = partidaRepository.findStatusPartidaById(partidaId);
+
+        if(statusPartida.equals(StatusPartida.EM_ANDAMENTO)) {
+            throw new PartidaNaoAguardandoException("Essa partida já está em andamento");
+        }
+        if(statusPartida.equals(StatusPartida.FINALIZADA)) {
+            throw new PartidaEncerradaException();
+        }
+
 		Cartela cartela = criaCartela(partidaId);
 		criaNumerosCartela(cartela);
 		return findPartidaDetalhesById(partidaId);
