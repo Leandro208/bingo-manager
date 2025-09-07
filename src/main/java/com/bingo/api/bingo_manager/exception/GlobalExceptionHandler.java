@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -46,5 +47,14 @@ public class GlobalExceptionHandler {
 				ex.getMessage(),
 				LocalDateTime.now());
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(erro);
+	}
+
+	@ExceptionHandler(ResponseStatusException.class)
+	public ResponseEntity<ErrorResponse> responseStatusException(ResponseStatusException ex){
+		ErrorResponse erro = new ErrorResponse(
+				ex.getStatusCode().value(),
+				ex.getReason(),
+				LocalDateTime.now());
+		return ResponseEntity.status(ex.getStatusCode()).body(erro);
 	}
 }

@@ -8,7 +8,7 @@ public class PartidaInput {
 	
 	private String nomePartida;
 	private LocalDateTime dataPartida;
-	private StatusPartida statusPartida;
+	private StatusPartida statusPartida = StatusPartida.AGUARDANDO;
 	
 	public String getNomePartida() {
 		return nomePartida;

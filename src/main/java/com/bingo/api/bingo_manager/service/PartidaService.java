@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.bingo.api.bingo_manager.dto.JogadorSimplesDTO;
+import com.bingo.api.bingo_manager.repository.UsuarioRepository;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,33 +34,34 @@ public class PartidaService {
 	private final CartelaNumeroRepository cartelaNumeroRepository;
 
 	private final ModelMapper modelMapper;
-	private final Long CRIADOR_FAKE = 1L;
 	private final int QTD_NUMEROS_CARTELA = 10;
+	private final UsuarioRepository usuarioRepository;
 
 	public PartidaService(PartidaRepository partidaRepository, ModelMapper modelMapper,
-			CartelaRepository cartelaRepository, CartelaNumeroRepository cartelaNumeroRepository) {
+						  CartelaRepository cartelaRepository, CartelaNumeroRepository cartelaNumeroRepository, UsuarioRepository usuarioRepository) {
 		this.partidaRepository = partidaRepository;
 		this.cartelaRepository = cartelaRepository;
 		this.cartelaNumeroRepository = cartelaNumeroRepository;
 		this.modelMapper = modelMapper;
+		this.usuarioRepository = usuarioRepository;
 	}
 
-	public PartidaDTO create(PartidaInput partidaInput) {
+	public PartidaDTO create(PartidaInput partidaInput, JwtAuthenticationToken token) {
 		Partida partida = modelMapper.map(partidaInput, Partida.class);
-		partida.setCriador(new Usuario());
-		partida.getCriador().setId(CRIADOR_FAKE);
+		partida.setCriador(usuarioRepository.findById((Long.parseLong(token.getName()))).get());
 		partida = partidaRepository.save(partida);
 		return modelMapper.map(partida, PartidaDTO.class);
 	}
 
 	@Transactional(readOnly = true)
 	public List<PartidaDetalhesDTO> findAll() {
-		return partidaRepository.findAll().stream().map(partida -> {
-			partida.getCartelas().iterator();
-			partida.getNumerosSorteados().iterator();
-			partida.getVencedores().iterator();
-			return modelMapper.map(partida, PartidaDetalhesDTO.class);
-		}).toList();
+		List<Partida> partidas = partidaRepository.findAllWithCartelas();
+		if (!partidas.isEmpty()) {
+			partidaRepository.findAllWithNumerosSorteados(partidas);
+		}
+		return partidas.stream()
+				.map(partida -> modelMapper.map(partida, PartidaDetalhesDTO.class))
+				.toList();
 	}
 
 	public PartidaDTO iniciar(Long idPartida) {
@@ -70,21 +74,20 @@ public class PartidaService {
 	}
 	
 	@Transactional
-	public PartidaDetalhesDTO entrar(Long partidaId) {
+	public PartidaDetalhesDTO entrar(Long partidaId, JwtAuthenticationToken token) {
 		if (!partidaRepository.existsById(partidaId)) {
 			throw new EntityNotFoundException("Partida não encontrada");
 		}
-		Cartela cartela = criaCartela(partidaId);
+		Cartela cartela = criaCartela(partidaId, token);
 		criaNumerosCartela(cartela);
 		return findPartidaDetalhesById(partidaId);
 	}
 	
-	private Cartela criaCartela(Long partidaId) {
+	private Cartela criaCartela(Long partidaId, JwtAuthenticationToken token) {
 		Cartela cartela = new Cartela();
 		Partida partida = partidaRepository.findById(partidaId).get();
 		cartela.setPartida(partida);
-		cartela.setUsuario(new Usuario());
-		cartela.getUsuario().setId(CRIADOR_FAKE);
+		cartela.setUsuario(usuarioRepository.findById((Long.parseLong(token.getName()))).get());
 		return cartelaRepository.save(cartela);
 	}
 	

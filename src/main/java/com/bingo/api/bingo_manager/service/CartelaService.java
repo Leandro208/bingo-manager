@@ -1,6 +1,8 @@
 package com.bingo.api.bingo_manager.service;
 
+import com.bingo.api.bingo_manager.repository.UsuarioRepository;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import com.bingo.api.bingo_manager.domain.Cartela;
@@ -14,37 +16,35 @@ import com.bingo.api.bingo_manager.repository.CartelaRepository;
 import com.bingo.api.bingo_manager.repository.PartidaRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CartelaService {
 
 	private final CartelaRepository cartelaRepository;
 	private final PartidaRepository partidaRepository;
+	private final UsuarioRepository usuarioRepository;
 	private final CartelaNumeroRepository cartelaNumeroRepository;
 
 	private final ModelMapper modelMapper;
 	
-	public CartelaService(CartelaRepository cartelaRepository, PartidaRepository partidaRepository, ModelMapper modelMapper, CartelaNumeroRepository cartelaNumeroRepository) {
+	public CartelaService(CartelaRepository cartelaRepository, PartidaRepository partidaRepository, UsuarioRepository usuarioRepository, ModelMapper modelMapper, CartelaNumeroRepository cartelaNumeroRepository) {
 		this.cartelaRepository = cartelaRepository;
 		this.partidaRepository = partidaRepository;
-		this.cartelaNumeroRepository = cartelaNumeroRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.cartelaNumeroRepository = cartelaNumeroRepository;
 		this.modelMapper = modelMapper;
 	}
 
-	public CartelaDTO buscarCartelaUsuario(Long idPartida) {
-		Usuario usuario = new Usuario();
-		usuario.setId(1L);
-		usuario.setNome("Leandro Barbosa");
-
-		Partida partida = partidaRepository.findById(idPartida)
-				.orElseThrow(() -> new EntityNotFoundException("Partida não encontrada"));
-		Cartela cartela = cartelaRepository.findByPartidaAndUsuario(partida, usuario);
-		CartelaDTO cartelaDTO = new CartelaDTO();
-		cartelaDTO.setId(cartela.getId());
-		cartelaDTO.setPartida(modelMapper.map(partida, PartidaSimplesDTO.class));
-		cartelaDTO.setUsuario(modelMapper.map(usuario, JogadorSimplesDTO.class));
-		cartelaDTO.setNumeros(cartelaNumeroRepository.findAllByCartelaId(cartela.getId()));
-		return cartelaDTO;
+	@Transactional(readOnly = true)
+	public CartelaDTO buscarCartelaUsuario(Long idPartida, JwtAuthenticationToken token) {
+		if (!partidaRepository.existsById(idPartida)) {
+			throw new EntityNotFoundException("Partida com ID " + idPartida + " não encontrada.");
+		}
+		Long idUsuarioLogado = Long.parseLong(token.getName());
+		Cartela cartela = cartelaRepository.findByPartidaIdAndUserIdWithDetails(idPartida, idUsuarioLogado)
+				.orElseThrow(() -> new EntityNotFoundException("Você não possui uma cartela nesta partida."));
+		return modelMapper.map(cartela, CartelaDTO.class);
 	}
 
 }

@@ -1,6 +1,10 @@
 package com.bingo.api.bingo_manager.dto;
 
+import com.bingo.api.bingo_manager.domain.Role;
+
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.Set;
 
 public class UsuarioDTO {
 
@@ -8,6 +12,7 @@ public class UsuarioDTO {
 	private String nome;
 	private String email;
 	private LocalDateTime dataCadastro;
+	private Set<Role> roles;
 	
 	public Long getId() {
 		return id;
@@ -33,6 +38,10 @@ public class UsuarioDTO {
 	public void setDataCadastro(LocalDateTime dataCadastro) {
 		this.dataCadastro = dataCadastro;
 	}
-	
-	
+	public Set<Role> getRoles() {
+		return roles;
+	}
+	public void setRoles(Set<Role> roles) {
+		this.roles = roles;
+	}
 }

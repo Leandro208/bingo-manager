@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,8 +29,8 @@ public class PartidaController {
 	}
 	
 	@PostMapping
-	public ResponseEntity<PartidaDTO> create(@RequestBody PartidaInput partida, UriComponentsBuilder uriBuilder) {
-		PartidaDTO partidaCriada = partidaService.create(partida);
+	public ResponseEntity<PartidaDTO> create(@RequestBody PartidaInput partida, UriComponentsBuilder uriBuilder, JwtAuthenticationToken token) {
+		PartidaDTO partidaCriada = partidaService.create(partida, token);
 		URI uri = uriBuilder.path("/topicos/{id}").buildAndExpand(partidaCriada.getId()).toUri();
 
 		return ResponseEntity.created(uri).body(partidaCriada);
@@ -41,8 +42,8 @@ public class PartidaController {
 	}
 	
 	@PostMapping("/{partidaId}/entrar")
-	public ResponseEntity<PartidaDetalhesDTO> entrar(@PathVariable Long partidaId) {
-		return ResponseEntity.ok(partidaService.entrar(partidaId));
+	public ResponseEntity<PartidaDetalhesDTO> entrar(@PathVariable Long partidaId,  JwtAuthenticationToken token) {
+		return ResponseEntity.ok(partidaService.entrar(partidaId, token));
 	}
 	
 	@PostMapping("/{partidaId}/iniciar")
