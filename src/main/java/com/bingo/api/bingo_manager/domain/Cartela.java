@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.OneToMany;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -37,7 +38,7 @@ public class Cartela implements PersistEntity{
 	@Column(name = "data_cadastro", nullable = false, updatable = false)
 	private LocalDateTime dataCadastro;
 
-	@OneToMany(mappedBy = "cartela")
+	@OneToMany(mappedBy = "cartela", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<CartelaNumero> numeros;
 
     @Column(name = "numeros_hash")

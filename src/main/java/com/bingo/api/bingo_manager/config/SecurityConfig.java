@@ -37,7 +37,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests(
                 authorizeRequests -> authorizeRequests
                         .requestMatchers(HttpMethod.POST,"/auth/*").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/status").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/status", "/partidas").permitAll()
                         .anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf.disable())

@@ -2,6 +2,7 @@ package com.bingo.api.bingo_manager.service;
 
 import com.bingo.api.bingo_manager.domain.CartelaNumero;
 import com.bingo.api.bingo_manager.exception.CartelaNaoCriadaException;
+import com.bingo.api.bingo_manager.exception.PartidaEncerradaException;
 import com.bingo.api.bingo_manager.repository.UsuarioRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CartelaService {
@@ -43,18 +45,20 @@ public class CartelaService {
 	}
 
 	@Transactional(readOnly = true)
-	public CartelaDTO buscarCartelaUsuario(Long idPartida, JwtAuthenticationToken token) {
+	public List<CartelaDTO> buscarCartelasDoUsuario(Long idPartida, JwtAuthenticationToken token) {
 		if (!partidaRepository.existsById(idPartida)) {
 			throw new EntityNotFoundException("Partida com ID " + idPartida + " não encontrada.");
 		}
 		Long idUsuarioLogado = Long.parseLong(token.getName());
-		Cartela cartela = cartelaRepository.findByPartidaIdAndUserIdWithDetails(idPartida, idUsuarioLogado)
+		List<Cartela> cartela = cartelaRepository.findAllByPartidaIdAndUserIdWithDetails(idPartida, idUsuarioLogado)
 				.orElseThrow(() -> new EntityNotFoundException("Você não possui uma cartela nesta partida."));
-		return modelMapper.map(cartela, CartelaDTO.class);
+		return cartela.stream()
+                .map(c -> modelMapper.map(c, CartelaDTO.class))
+                .collect(Collectors.toList());
 	}
 
-
-    public void criaCartela(Long partidaId, JwtAuthenticationToken token) {
+    @Transactional
+    public CartelaDTO criaCartela(Long partidaId, JwtAuthenticationToken token) {
         Cartela cartela = new Cartela();
         Partida partida = partidaRepository.findById(partidaId).get();
         if(cartelaRepository.isLimiteAtingidoDeCartelasPorUsuario(partidaId, Long.parseLong(token.getName()))) {
@@ -64,10 +68,20 @@ public class CartelaService {
         cartela.setUsuario(usuarioRepository.findById((Long.parseLong(token.getName()))).get());
         cartela.getUsuario().setId(Long.parseLong(token.getName()));
         cartelaRepository.save(cartela);
-        criaNumerosCartela(cartela);
+        return criaNumerosCartela(cartela);
     }
 
-    public void criaNumerosCartela(Cartela cartela){
+    public void apagarCartela(Long idCartela, Long idPartida ,JwtAuthenticationToken token) {
+        if(!partidaRepository.existsById(idPartida)) {
+            throw  new PartidaEncerradaException("Partida inexistente");
+        }
+        if(!cartelaRepository.existsById(idCartela)) {
+            throw new CartelaNaoCriadaException("Cartela não encontrada.");
+        }
+        cartelaRepository.deleteById(idCartela);
+    }
+
+    private CartelaDTO criaNumerosCartela(Cartela cartela){
         List<CartelaNumero> listaNumeros = new ArrayList<>();
         List<Integer> numerosGerados = sorteiaNumerosCartela();
         Collections.sort(numerosGerados);
@@ -84,8 +98,8 @@ public class CartelaService {
             listaNumeros.add(cartelaNumero);
         }
         cartela.setHashCodeNumeros(hashCode);
-        cartelaRepository.save(cartela);
         cartelaNumeroRepository.saveAll(listaNumeros);
+        return modelMapper.map(cartela, CartelaDTO.class);
     }
 
     private List<Integer> sorteiaNumerosCartela(){

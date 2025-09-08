@@ -1,6 +1,8 @@
 package com.bingo.api.bingo_manager.repository;
 
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -9,6 +11,7 @@ import com.bingo.api.bingo_manager.domain.Cartela;
 import com.bingo.api.bingo_manager.domain.Partida;
 import com.bingo.api.bingo_manager.domain.Usuario;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -21,7 +24,7 @@ public interface CartelaRepository extends JpaRepository<Cartela, Long>{
 			"LEFT JOIN FETCH c.usuario u " +
 			"LEFT JOIN FETCH c.numeros n " +
 			"WHERE p.id = :partidaId AND u.id = :userId")
-	Optional<Cartela> findByPartidaIdAndUserIdWithDetails(@Param("partidaId") Long partidaId, @Param("userId") Long userId
+	Optional<List<Cartela>> findAllByPartidaIdAndUserIdWithDetails(@Param("partidaId") Long partidaId, @Param("userId") Long userId
 	);
 
     @Query("SELECT COUNT(*) > 0 FROM Cartela c " +
@@ -34,4 +37,5 @@ public interface CartelaRepository extends JpaRepository<Cartela, Long>{
             "WHERE c.partida.id = :partidaId " +
             "and c.usuario.id = :usuarioId")
     Boolean isLimiteAtingidoDeCartelasPorUsuario(@Param("partidaId")  Long partidaId, @Param("usuarioId") Long usuarioId);
+
 }
