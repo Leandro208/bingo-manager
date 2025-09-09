@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Ignorar chaves de aplicação e segredos
+app.key
+app.pub
