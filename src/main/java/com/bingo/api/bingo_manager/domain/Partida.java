@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+import jakarta.persistence.PrePersist;
 import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.Column;
@@ -129,6 +130,12 @@ public class Partida implements PersistEntity{
 	public void setVencedores(List<Vencedor> vencedores) {
 		this.vencedores = vencedores;
 	}
+
+    @PrePersist
+    void prePersist() {
+        this.statusPartida = StatusPartida.AGUARDANDO;
+        this.dataCadastro = LocalDateTime.now();
+    }
 
 	@Override
 	public int hashCode() {

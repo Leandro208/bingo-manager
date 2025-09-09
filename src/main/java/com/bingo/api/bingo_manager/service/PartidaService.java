@@ -1,10 +1,6 @@
 package com.bingo.api.bingo_manager.service;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import com.bingo.api.bingo_manager.dto.JogadorSimplesDTO;
 import com.bingo.api.bingo_manager.repository.UsuarioRepository;
 
 import com.bingo.api.bingo_manager.exception.PartidaEncerradaException;
@@ -15,17 +11,12 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.bingo.api.bingo_manager.domain.Cartela;
-import com.bingo.api.bingo_manager.domain.CartelaNumero;
 import com.bingo.api.bingo_manager.domain.Partida;
 import com.bingo.api.bingo_manager.domain.StatusPartida;
-import com.bingo.api.bingo_manager.domain.Usuario;
 import com.bingo.api.bingo_manager.dto.PartidaDTO;
 import com.bingo.api.bingo_manager.dto.PartidaDetalhesDTO;
 import com.bingo.api.bingo_manager.dto.input.PartidaInput;
 import com.bingo.api.bingo_manager.exception.PartidaNaoAguardandoException;
-import com.bingo.api.bingo_manager.repository.CartelaNumeroRepository;
-import com.bingo.api.bingo_manager.repository.CartelaRepository;
 import com.bingo.api.bingo_manager.repository.PartidaRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -34,18 +25,15 @@ import jakarta.persistence.EntityNotFoundException;
 public class PartidaService {
 
 	private final PartidaRepository partidaRepository;
-	private final CartelaRepository cartelaRepository;
-	private final CartelaNumeroRepository cartelaNumeroRepository;
+	private final CartelaService cartelaService;
 
 	private final ModelMapper modelMapper;
-	private final int QTD_NUMEROS_CARTELA = 10;
 	private final UsuarioRepository usuarioRepository;
 
 	public PartidaService(PartidaRepository partidaRepository, ModelMapper modelMapper,
-						  CartelaRepository cartelaRepository, CartelaNumeroRepository cartelaNumeroRepository, UsuarioRepository usuarioRepository) {
+			CartelaService cartelaService, UsuarioRepository usuarioRepository) {
 		this.partidaRepository = partidaRepository;
-		this.cartelaRepository = cartelaRepository;
-		this.cartelaNumeroRepository = cartelaNumeroRepository;
+		this.cartelaService = cartelaService;
 		this.modelMapper = modelMapper;
 		this.usuarioRepository = usuarioRepository;
 	}
@@ -110,37 +98,11 @@ public class PartidaService {
         if(statusPartida.equals(StatusPartida.FINALIZADA)) {
             throw new PartidaEncerradaException();
         }
-
-		Cartela cartela = criaCartela(partidaId,token);
-		criaNumerosCartela(cartela);
+		cartelaService.criaCartela(partidaId, token);
 		return findPartidaDetalhesById(partidaId);
 	}
 	
-	private Cartela criaCartela(Long partidaId, JwtAuthenticationToken token) {
-		Cartela cartela = new Cartela();
-		Partida partida = partidaRepository.findById(partidaId).get();
-		cartela.setPartida(partida);
-		cartela.setUsuario(usuarioRepository.findById((Long.parseLong(token.getName()))).get());
-		return cartelaRepository.save(cartela);
-	}
-	
-	private void criaNumerosCartela(Cartela cartela){
-		List<CartelaNumero> listaNumeros = new ArrayList<>();
-		List<Integer> numeros = new ArrayList<>();
-		for (int i = 1; i <= 100; i++) {
-			numeros.add(i);
-		}
-		Collections.shuffle(numeros);
-		List<Integer> numerosGerados = numeros.subList(0, QTD_NUMEROS_CARTELA);
-		for (int i = 0; i < QTD_NUMEROS_CARTELA; i++) {
-			CartelaNumero cartelaNumero = new CartelaNumero();
-			cartelaNumero.setCartela(cartela);
-			cartelaNumero.setMarcado(false);
-			cartelaNumero.setNumero(numerosGerados.get(i));
-			listaNumeros.add(cartelaNumero);
-		}
-		cartelaNumeroRepository.saveAll(listaNumeros);
-	}
+
 	
 	@Transactional(readOnly = true)
 	public PartidaDetalhesDTO findPartidaDetalhesById(Long idPartida) {
